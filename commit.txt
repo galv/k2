@@ -1,0 +1,64 @@
+Convert license header to "proper" Apache 2 license header.
+
+It comes from here, which the NVIDIA legal team recommends:
+
+https://gist.github.com/Rypac/7349957f95f0713143fda2f3d3bc10c8
+
+Basically, the NVIDIA legal team requires that my code contributions
+have an Apache 2 license header. If I were to contribute to an
+existing file (which I want to do), I would have to manually change
+each file's header for legal compliance. @danpovey said that going
+ahead and changing all the file headers to an official Apache 2 header
+sounded reasonable.
+
+I used codemod (`pip install codemod`) for this, with the following
+script:
+
+```
+read -r -d '' replacement << EOM
+   Copyright     \1 See LICENSE for clarification regarding multiple authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+EOM
+
+
+codemod --exclude-paths build -m -d . --extensions cu,h \
+        "Copyright \(c\) (.+) See LICENSE for clarification regarding multiple authors" \
+        "$replacement"
+
+
+read -r -d '' replacement << EOM
+   Copyright     \1 authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+EOM
+
+
+codemod --exclude-paths build -m -d . --extensions cmake,py \
+        "Copyright \(c\) (.+) authors" \
+        "$replacement"
+```
+
+Codemod, unlike sed, is interactive. I manually checked that every
+replacement made sense. Note that I applied this only to .cu, .h,
+.cmake, and .py files.
